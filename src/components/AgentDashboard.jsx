@@ -47,17 +47,34 @@ const alerts = [
 ];
 
 /* ─── Components ─── */
-const Sidebar = ({ active, onNav }) => {
+const Sidebar = ({ active, onNav, isMobile }) => {
   const items = [
     { id:"home", icon:"⊞", l:"Dashboard" },
     { id:"cashIn", icon:"↙", l:"Cash-In" },
     { id:"cashOut", icon:"↗", l:"Cash-Out" },
-    { id:"register", icon:"+", l:"Register User" },
-    { id:"txnLog", icon:"☰", l:"Transactions" },
+    { id:"register", icon:"+", l:"Register" },
+    { id:"txnLog", icon:"☰", l:"Txns" },
     { id:"earnings", icon:"◈", l:"Earnings" },
-    { id:"float", icon:"◎", l:"Float Mgmt" },
+    { id:"float", icon:"◎", l:"Float" },
     { id:"settings", icon:"⚙", l:"Settings" },
   ];
+  if(isMobile){
+    return (
+      <div style={{ display:"flex", background:C.navy, borderBottom:`1px solid rgba(255,255,255,0.06)`, overflowX:"auto", WebkitOverflowScrolling:"touch" }}>
+        {items.map(it=>(
+          <div key={it.id} onClick={()=>onNav(it.id)} style={{
+            display:"flex", flexDirection:"column", alignItems:"center", gap:2, padding:"10px 12px",
+            cursor:"pointer", flexShrink:0, minWidth:56,
+            background:active===it.id?"rgba(10,104,71,0.25)":"transparent",
+            color:active===it.id?C.green400:"rgba(255,255,255,0.45)",
+          }}>
+            <span style={{ fontSize:16 }}>{it.icon}</span>
+            <span style={{ fontSize:9, fontWeight:active===it.id?700:500, whiteSpace:"nowrap" }}>{it.l}</span>
+          </div>
+        ))}
+      </div>
+    );
+  }
   return (
     <div style={{ width:220, background:C.navy, minHeight:"100%", display:"flex", flexDirection:"column", borderRight:`1px solid rgba(255,255,255,0.06)` }}>
       <div style={{ padding:"20px 18px 16px", borderBottom:`1px solid rgba(255,255,255,0.06)` }}>
@@ -170,12 +187,12 @@ const LoginScreen = ({ onLogin }) => (
 );
 
 /* ═══ DASHBOARD HOME ═══ */
-const DashboardHome = ({ go }) => (
+const DashboardHome = ({ go, isMobile }) => (
   <div>
     <TopBar title="Dashboard" subtitle="Welcome back, Noor Exchange"/>
-    <div style={{ padding:24 }}>
+    <div style={{ padding:isMobile?12:24 }}>
       {/* Stats */}
-      <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:16, marginBottom:24 }}>
+      <div style={{ display:"grid", gridTemplateColumns:isMobile?"repeat(2,1fr)":"repeat(4,1fr)", gap:isMobile?8:16, marginBottom:isMobile?16:24 }}>
         <StatCard label="FLOAT BALANCE" value={`؋ ${agent.floatAFN.toLocaleString()}`} sub={`≈ $ ${agent.floatUSD.toLocaleString()} USD`} icon="◎" />
         <StatCard label="TODAY'S TRANSACTIONS" value={agent.txnToday} sub="22 cash-in · 25 cash-out" icon="↕" color={C.blue} bgColor={C.blueLight}/>
         <StatCard label="TODAY'S COMMISSION" value={`؋ ${agent.commToday.toLocaleString()}`} sub={`≈ $ ${(agent.commToday*0.01162).toFixed(2)}`} icon="◈" color={C.gold} bgColor={C.goldLight}/>
@@ -183,7 +200,7 @@ const DashboardHome = ({ go }) => (
       </div>
 
       {/* Quick Actions */}
-      <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:12, marginBottom:24 }}>
+      <div style={{ display:"grid", gridTemplateColumns:isMobile?"1fr":"repeat(3,1fr)", gap:12, marginBottom:isMobile?16:24 }}>
         {[
           { l:"Cash-In", desc:"Deposit cash to user wallet", icon:"↙", color:C.deepGreen, bg:C.greenLight, act:"cashIn" },
           { l:"Cash-Out", desc:"Withdraw cash from wallet", icon:"↗", color:C.gold, bg:C.goldLight, act:"cashOut" },
@@ -199,7 +216,7 @@ const DashboardHome = ({ go }) => (
         ))}
       </div>
 
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16 }}>
+      <div style={{ display:"grid", gridTemplateColumns:isMobile?"1fr":"1fr 1fr", gap:16 }}>
         {/* Recent Transactions */}
         <div style={{ background:C.white, borderRadius:14, border:`1px solid ${C.g200}`, overflow:"hidden" }}>
           <div style={{ padding:"14px 18px", borderBottom:`1px solid ${C.g100}`, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
@@ -771,14 +788,16 @@ const SettingsScreen = () => (
 export default function AgentDashboard() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [screen, setScreen] = useState("home");
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(()=>{const check=()=>setIsMobile(window.innerWidth<768);check();window.addEventListener("resize",check);return()=>window.removeEventListener("resize",check);},[]);
 
   if(!loggedIn) return <LoginScreen onLogin={()=>setLoggedIn(true)}/>;
 
   return (
-    <div style={{ display:"flex", minHeight:"calc(100vh - 56px)", background:C.off, fontFamily:"'Outfit',sans-serif" }}>
-      <Sidebar active={screen} onNav={setScreen}/>
+    <div style={{ display:"flex", flexDirection:isMobile?"column":"row", minHeight:"calc(100vh - 56px)", background:C.off, fontFamily:"'Outfit',sans-serif" }}>
+      <Sidebar active={screen} onNav={setScreen} isMobile={isMobile}/>
       <div style={{ flex:1, overflowY:"auto", maxHeight:"100vh" }}>
-        {screen==="home"&&<DashboardHome go={setScreen}/>}
+        {screen==="home"&&<DashboardHome go={setScreen} isMobile={isMobile}/>}
         {screen==="cashIn"&&<CashInScreen go={setScreen}/>}
         {screen==="cashOut"&&<CashOutScreen go={setScreen}/>}
         {screen==="register"&&<RegisterScreen go={setScreen}/>}

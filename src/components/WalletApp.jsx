@@ -851,6 +851,8 @@ export default function WalletApp() {
   const [screen, setScreen] = useState("splash");
   const [screenData, setScreenData] = useState(null);
   const [history, setHistory] = useState([]);
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(()=>{const check=()=>setIsMobile(window.innerWidth<768);check();window.addEventListener("resize",check);return()=>window.removeEventListener("resize",check);},[]);
 
   const go = (to, data=null) => { setHistory(h=>[...h,{screen,data:screenData}]); setScreen(to); setScreenData(data); };
   const goBack = () => { if(history.length){const prev=history[history.length-1]; setHistory(h=>h.slice(0,-1)); setScreen(prev.screen); setScreenData(prev.data);} else setScreen("home"); };
@@ -874,6 +876,39 @@ export default function WalletApp() {
     notifications:"All notifications — transfers, security, promotions", changePin:"3-step: verify current → new PIN → confirm new PIN",
     help:"Live chat/call support (trilingual) + expandable FAQ", profile:"Account settings, language, currency, device, support links",
   };
+
+  const screenContent = (
+    <>
+      {screen==="splash"&&<SplashScreen onNext={()=>go("onboarding")}/>}
+      {screen==="onboarding"&&<OnboardingScreen onNext={()=>go("signup")}/>}
+      {screen==="signup"&&<SignupScreen onNext={()=>go("otp")}/>}
+      {screen==="otp"&&<OTPScreen onNext={()=>go("pin")}/>}
+      {screen==="pin"&&<PINSetScreen onNext={()=>go("home")}/>}
+      {screen==="home"&&<HomeScreen onNav={handleNav} go={go}/>}
+      {screen==="send"&&<SendScreen onBack={goBack} onComplete={()=>{setHistory([]);setScreen("home");}}/>}
+      {screen==="deposit"&&<DepositScreen onBack={goBack} go={go}/>}
+      {screen==="withdraw"&&<WithdrawScreen onBack={goBack}/>}
+      {screen==="history"&&<HistoryScreen onNav={handleNav} go={go}/>}
+      {screen==="txnDetail"&&<TxnDetailScreen onBack={goBack} data={screenData}/>}
+      {screen==="qr"&&<QRScreen onNav={handleNav}/>}
+      {screen==="agents"&&<AgentsScreen onNav={handleNav} go={go}/>}
+      {screen==="agentDetail"&&<AgentDetailScreen onBack={goBack} data={screenData}/>}
+      {screen==="notifications"&&<NotificationsScreen onBack={goBack}/>}
+      {screen==="changePin"&&<ChangePINScreen onBack={goBack}/>}
+      {screen==="help"&&<HelpScreen onBack={goBack}/>}
+      {screen==="profile"&&<ProfileScreen onNav={handleNav} go={go}/>}
+    </>
+  );
+
+  if(isMobile){
+    return (
+      <div style={{ minHeight:"calc(100vh - 56px)", background:C.off, fontFamily:"'Outfit',sans-serif" }}>
+        <div style={{ width:"100%", maxWidth:400, margin:"0 auto", minHeight:"calc(100vh - 56px)", background:C.white, overflowY:"auto" }}>
+          {screenContent}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ minHeight:"calc(100vh - 56px)", background:`linear-gradient(135deg,#0c1220 0%,${C.navy} 100%)`, display:"flex", alignItems:"center", justifyContent:"center", padding:"40px 20px", fontFamily:"'Outfit',sans-serif" }}>
@@ -903,24 +938,7 @@ export default function WalletApp() {
         <div style={{ width:300, background:"#1a1a2e", borderRadius:36, padding:8, boxShadow:`0 30px 80px rgba(0,0,0,0.5),0 0 0 1px rgba(255,255,255,0.05),0 0 60px ${C.greenGlow}`, position:"relative" }}>
           <div style={{ width:100, height:6, background:"#2a2a4a", borderRadius:3, position:"absolute", top:14, left:"50%", transform:"translateX(-50%)", zIndex:5 }}/>
           <div style={{ marginTop:14, borderRadius:28, overflow:"hidden", background:C.white, minHeight:580, maxHeight:620, overflowY:"auto", position:"relative" }}>
-            {screen==="splash"&&<SplashScreen onNext={()=>go("onboarding")}/>}
-            {screen==="onboarding"&&<OnboardingScreen onNext={()=>go("signup")}/>}
-            {screen==="signup"&&<SignupScreen onNext={()=>go("otp")}/>}
-            {screen==="otp"&&<OTPScreen onNext={()=>go("pin")}/>}
-            {screen==="pin"&&<PINSetScreen onNext={()=>go("home")}/>}
-            {screen==="home"&&<HomeScreen onNav={handleNav} go={go}/>}
-            {screen==="send"&&<SendScreen onBack={goBack} onComplete={()=>{setHistory([]);setScreen("home");}}/>}
-            {screen==="deposit"&&<DepositScreen onBack={goBack} go={go}/>}
-            {screen==="withdraw"&&<WithdrawScreen onBack={goBack}/>}
-            {screen==="history"&&<HistoryScreen onNav={handleNav} go={go}/>}
-            {screen==="txnDetail"&&<TxnDetailScreen onBack={goBack} data={screenData}/>}
-            {screen==="qr"&&<QRScreen onNav={handleNav}/>}
-            {screen==="agents"&&<AgentsScreen onNav={handleNav} go={go}/>}
-            {screen==="agentDetail"&&<AgentDetailScreen onBack={goBack} data={screenData}/>}
-            {screen==="notifications"&&<NotificationsScreen onBack={goBack}/>}
-            {screen==="changePin"&&<ChangePINScreen onBack={goBack}/>}
-            {screen==="help"&&<HelpScreen onBack={goBack}/>}
-            {screen==="profile"&&<ProfileScreen onNav={handleNav} go={go}/>}
+            {screenContent}
           </div>
           <div style={{ width:100, height:4, background:"rgba(255,255,255,0.15)", borderRadius:2, margin:"8px auto 4px" }}/>
         </div>

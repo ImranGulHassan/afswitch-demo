@@ -49,7 +49,7 @@ export default function LandingPage() {
         </div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 20, maxWidth: 900, width: "100%" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 20, maxWidth: 900, width: "100%" }}>
         {cards.map(c => (
           <div key={c.path} onClick={() => router.push(c.path)} style={{
             background: "#fff", borderRadius: 20, padding: "32px 24px",

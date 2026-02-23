@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const C = {
   deepGreen:"#0A6847", green500:"#10B981", green400:"#34D399", green100:"#D1FAE5",
@@ -690,6 +690,8 @@ export default function AgentMobile() {
   const [screen,setScreen]=useState("home");
   const [screenData,setScreenData]=useState(null);
   const [history,setHistory]=useState([]);
+  const [isMobile,setIsMobile]=useState(false);
+  useEffect(()=>{const check=()=>setIsMobile(window.innerWidth<768);check();window.addEventListener("resize",check);return()=>window.removeEventListener("resize",check);},[]);
 
   const go = (to,data=null)=>{setHistory(h=>[...h,{screen,data:screenData}]);setScreen(to);setScreenData(data);};
   const goBack = ()=>{if(history.length){const p=history[history.length-1];setHistory(h=>h.slice(0,-1));setScreen(p.screen);setScreenData(p.data);}else{setScreen("home");setScreenData(null);}};
@@ -718,20 +720,51 @@ export default function AgentMobile() {
 
   if(!loggedIn){
     return (
-      <div style={{ minHeight:"calc(100vh - 56px)", background:`linear-gradient(135deg,#0c1220,${C.navy})`, display:"flex", alignItems:"center", justifyContent:"center", padding:"40px 20px", fontFamily:"'Outfit',sans-serif" }}>
-        <div style={{ display:"flex", gap:60, alignItems:"center" }}>
-          <div style={{ width:210, color:C.white }}>
-            <div style={{ fontSize:12, fontWeight:600, color:C.gold, letterSpacing:2, marginBottom:8 }}>AGENT PORTAL</div>
-            <div style={{ fontSize:22, fontWeight:800, marginBottom:4 }}>Login</div>
-            <div style={{ fontSize:12, color:"rgba(255,255,255,0.4)", lineHeight:1.6 }}>Agent authentication — phone + 6-digit PIN + device binding</div>
+      <div style={{ minHeight:"calc(100vh - 56px)", background:`linear-gradient(135deg,#0c1220,${C.navy})`, display:"flex", alignItems:"center", justifyContent:"center", padding:isMobile?"0":"40px 20px", fontFamily:"'Outfit',sans-serif" }}>
+        {isMobile ? (
+          <div style={{ width:"100%", maxWidth:400, margin:"0 auto" }}>
+            <LoginScreen onLogin={()=>setLoggedIn(true)}/>
           </div>
-          <div style={{ width:300, background:"#1a1a2e", borderRadius:36, padding:8, boxShadow:`0 30px 80px rgba(0,0,0,0.5)`, position:"relative" }}>
-            <div style={{ width:100, height:6, background:"#2a2a4a", borderRadius:3, position:"absolute", top:14, left:"50%", transform:"translateX(-50%)", zIndex:5 }}/>
-            <div style={{ marginTop:14, borderRadius:28, overflow:"hidden", background:C.white, minHeight:580, maxHeight:620, overflowY:"auto" }}>
-              <LoginScreen onLogin={()=>setLoggedIn(true)}/>
+        ) : (
+          <div style={{ display:"flex", gap:60, alignItems:"center" }}>
+            <div style={{ width:210, color:C.white }}>
+              <div style={{ fontSize:12, fontWeight:600, color:C.gold, letterSpacing:2, marginBottom:8 }}>AGENT PORTAL</div>
+              <div style={{ fontSize:22, fontWeight:800, marginBottom:4 }}>Login</div>
+              <div style={{ fontSize:12, color:"rgba(255,255,255,0.4)", lineHeight:1.6 }}>Agent authentication — phone + 6-digit PIN + device binding</div>
             </div>
-            <div style={{ width:100, height:4, background:"rgba(255,255,255,0.15)", borderRadius:2, margin:"8px auto 4px" }}/>
+            <div style={{ width:300, background:"#1a1a2e", borderRadius:36, padding:8, boxShadow:`0 30px 80px rgba(0,0,0,0.5)`, position:"relative" }}>
+              <div style={{ width:100, height:6, background:"#2a2a4a", borderRadius:3, position:"absolute", top:14, left:"50%", transform:"translateX(-50%)", zIndex:5 }}/>
+              <div style={{ marginTop:14, borderRadius:28, overflow:"hidden", background:C.white, minHeight:580, maxHeight:620, overflowY:"auto" }}>
+                <LoginScreen onLogin={()=>setLoggedIn(true)}/>
+              </div>
+              <div style={{ width:100, height:4, background:"rgba(255,255,255,0.15)", borderRadius:2, margin:"8px auto 4px" }}/>
+            </div>
           </div>
+        )}
+      </div>
+    );
+  }
+
+  const screenContent = (
+    <>
+      {screen==="home"&&<HomeScreen onNav={handleNav} go={go}/>}
+      {screen==="cashIn"&&<CashInScreen onNav={handleNav} goBack={goBack}/>}
+      {screen==="cashOut"&&<CashOutScreen onNav={handleNav} goBack={goBack}/>}
+      {screen==="register"&&<RegisterScreen goBack={goBack}/>}
+      {screen==="txnLog"&&<TxnLogScreen onNav={handleNav} go={go}/>}
+      {screen==="txnDetail"&&<TxnDetailScreen goBack={goBack} data={screenData}/>}
+      {screen==="earnings"&&<EarningsScreen goBack={goBack}/>}
+      {screen==="float"&&<FloatScreen goBack={goBack}/>}
+      {screen==="alerts"&&<AlertsScreen goBack={goBack}/>}
+      {screen==="more"&&<MoreScreen onNav={handleNav} go={go}/>}
+    </>
+  );
+
+  if(isMobile){
+    return (
+      <div style={{ minHeight:"calc(100vh - 56px)", background:C.off, fontFamily:"'Outfit',sans-serif" }}>
+        <div style={{ width:"100%", maxWidth:400, margin:"0 auto", minHeight:"calc(100vh - 56px)", background:C.white, overflowY:"auto" }}>
+          {screenContent}
         </div>
       </div>
     );
@@ -764,16 +797,7 @@ export default function AgentMobile() {
         <div style={{ width:300, background:"#1a1a2e", borderRadius:36, padding:8, boxShadow:`0 30px 80px rgba(0,0,0,0.5),0 0 0 1px rgba(255,255,255,0.05)`, position:"relative" }}>
           <div style={{ width:100, height:6, background:"#2a2a4a", borderRadius:3, position:"absolute", top:14, left:"50%", transform:"translateX(-50%)", zIndex:5 }}/>
           <div style={{ marginTop:14, borderRadius:28, overflow:"hidden", background:C.white, minHeight:580, maxHeight:620, overflowY:"auto", position:"relative" }}>
-            {screen==="home"&&<HomeScreen onNav={handleNav} go={go}/>}
-            {screen==="cashIn"&&<CashInScreen onNav={handleNav} goBack={goBack}/>}
-            {screen==="cashOut"&&<CashOutScreen onNav={handleNav} goBack={goBack}/>}
-            {screen==="register"&&<RegisterScreen goBack={goBack}/>}
-            {screen==="txnLog"&&<TxnLogScreen onNav={handleNav} go={go}/>}
-            {screen==="txnDetail"&&<TxnDetailScreen goBack={goBack} data={screenData}/>}
-            {screen==="earnings"&&<EarningsScreen goBack={goBack}/>}
-            {screen==="float"&&<FloatScreen goBack={goBack}/>}
-            {screen==="alerts"&&<AlertsScreen goBack={goBack}/>}
-            {screen==="more"&&<MoreScreen onNav={handleNav} go={go}/>}
+            {screenContent}
           </div>
           <div style={{ width:100, height:4, background:"rgba(255,255,255,0.15)", borderRadius:2, margin:"8px auto 4px" }}/>
         </div>
