@@ -17,6 +17,11 @@ const cards = [
     desc: "Mobile wallet experience: onboarding, send/receive, deposit/withdraw, QR payments, agent locator.",
     color: "#3B82F6", bg: "#EFF6FF",
   },
+  {
+    path: "/agent-mobile", title: "Agent Mobile", icon: "📲",
+    desc: "Mobile agent experience: phone-frame view of cash-in, cash-out, registration, float management, and earnings.",
+    color: "#8B5CF6", bg: "#F5F3FF",
+  },
 ];
 
 export default function LandingPage() {
@@ -44,7 +49,7 @@ export default function LandingPage() {
         </div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 20, maxWidth: 900, width: "100%" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 20, maxWidth: 900, width: "100%" }}>
         {cards.map(c => (
           <div key={c.path} onClick={() => router.push(c.path)} style={{
             background: "#fff", borderRadius: 20, padding: "32px 24px",

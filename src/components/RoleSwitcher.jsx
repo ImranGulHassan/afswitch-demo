@@ -5,6 +5,7 @@ const roles = [
   { path: "/admin", label: "Admin Console" },
   { path: "/agent", label: "Agent Portal" },
   { path: "/wallet", label: "User Wallet" },
+  { path: "/agent-mobile", label: "Agent Mobile" },
 ];
 
 export default function RoleSwitcher() {
